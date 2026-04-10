@@ -32,7 +32,7 @@ function init() {
     scene.fog = new THREE.Fog(0x050505, 0, 40);
 
     camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.set(0, 2.0, 10);
+    camera.position.set(0, 2.5, 10);
 
     renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
@@ -186,8 +186,8 @@ function animate() {
         controls.moveForward(-velocity.z * delta);
         camera.position.y += (velocity.y * delta);
 
-        if (camera.position.y < 2.0) {
-            velocity.y = 0; camera.position.y = 2.0; canJump = true;
+        if (camera.position.y < 2.5) {
+            velocity.y = 0; camera.position.y = 2.5; canJump = true;
         }
 
         // --- 1. LOGIC CHẶN TƯỜNG (COLLISION) ---
