@@ -96,9 +96,9 @@ function createWorld() {
 
     // Tranh
     addArt('textures/mona.JPG', 6, 4, 0, -19.4, 0, 
-        "molisa");
+        "molisa", "tranh nhu db");
     addArt('textures/the-madonna.jpg', 5, 5, -19.4, 5, Math.PI/2,
-        "tranhdepkhong");
+        "tranh", "xau vl.");
 }
 
 function addArt(url, w, h, x, z, ry, title, desc) {
