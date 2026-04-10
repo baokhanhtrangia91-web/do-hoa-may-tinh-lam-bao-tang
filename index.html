@@ -40,7 +40,6 @@
             width: 2px; height: 100%; background: rgba(255,255,255,0.8);
             transform: translateX(-50%);
         }
-        /* Hiệu ứng khi nhìn vào tranh */
         #crosshair.active::before, #crosshair.active::after { background: #ffff00; }
 
         /* Bảng mô tả tác phẩm */
@@ -48,11 +47,39 @@
             display: none; position: absolute; top: 50%; right: 5%; 
             transform: translateY(-50%); background: rgba(15, 15, 15, 0.95); 
             color: white; padding: 30px; border-left: 5px solid #00ff00;
-            width: 320px; pointer-events: none; z-index: 80;
+            width: 320px; 
+            /* CẬP NHẬT: Cho phép click vào nút bấm bên trong bảng */
+            pointer-events: auto; 
+            z-index: 80;
             box-shadow: 0 0 20px rgba(0,0,0,0.5);
         }
         #art-title { margin: 0 0 10px 0; color: #00ff00; text-transform: uppercase; }
-        #art-text { line-height: 1.6; color: #ccc; }
+        #art-text { line-height: 1.6; color: #ccc; margin-bottom: 20px; }
+
+        /* CẬP NHẬT: Style cho nút bấm Media */
+        #media-btn {
+            background: #00ff00;
+            color: black;
+            border: none;
+            padding: 10px 20px;
+            font-weight: bold;
+            text-transform: uppercase;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s;
+            display: none; /* Ẩn mặc định, chỉ hiện khi có media */
+        }
+        #media-btn:hover {
+            background: #ffff00;
+            box-shadow: 0 0 10px #ffff00;
+        }
+        video {
+            width: 100%;
+            margin-top: 15px;
+            border: 1px solid #333;
+            display: none;
+        }
+
         .key { color: #00ff00; font-weight: bold; }
     </style>
 </head>
@@ -75,6 +102,13 @@
     <div id="art-description">
         <h2 id="art-title">Tiêu đề</h2>
         <p id="art-text">Mô tả chi tiết...</p>
+        
+        <button id="media-btn">▶ PHÁT THUYẾT MINH</button>
+        
+        <video id="art-video" controls></video>
+        <video src="video.mp4" controls></video>
+        <audio id="art-audio"></audio>
+
         <p style="font-size: 0.8em; color: #666; margin-top: 15px;">Nhấn <span class="key">E</span> để đóng</p>
     </div>
 
