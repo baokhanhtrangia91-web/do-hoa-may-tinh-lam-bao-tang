@@ -1,0 +1,74 @@
+{
+  "phong_1": {
+    "tac_gia": {
+      "ten": "Leonardo da Vinci",
+      "nam_sinh": 1452,
+      "nam_mat": 1519,
+      "thoi_dai": "Đỉnh cao Phục hưng",
+      "tieu_su": "Thiên tài toàn năng người Ý, hiện thân của tinh thần Phục hưng với sự kết hợp hoàn hảo giữa nghệ thuật vị nhân sinh và tư duy khoa học vượt thời đại.\nÔng là bậc thầy tiên phong trong kỹ thuật Sfumato và nghiên cứu giải phẫu học, tạo nên những kiệt tác chứa đựng các ẩn đố về toán học, âm nhạc và triết học.\nDi sản đồ sộ của ông không chỉ dừng lại ở những bức họa đắt giá nhất hành tinh mà còn là nền móng cho kỹ thuật và ý tưởng máy móc của tương lai.",
+      "anh_tac_gia": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/ba/Leonardo_self_portrait.jpg/400px-Leonardo_self_portrait.jpg"
+    },
+    "danh_sach_tranh": [
+      {
+        "id": "davinci_01",
+        "ten": "Mona Lisa",
+        "nam_hoan_thanh": "1503 - 1519",
+        "kich_thuoc": "77 cm x 53 cm",
+        "chat_lieu": "Sơn dầu trên gỗ dương",
+        "vi_tri": "Bảo tàng Louvre, Pháp",
+        "mo_ta": "Sử dụng kỹ thuật Sfumato tạo hiệu ứng mờ ảo giữa các lớp màu và ánh sáng.\nNụ cười và ánh mắt thay đổi sắc thái tùy theo góc nhìn của người xem.\nTác phẩm là biểu tượng bất diệt của nghệ thuật Phục hưng đang được bảo vệ nghiêm ngặt.",
+        "su_that_thu_vi": "Nàng Mona Lisa không có lông mày, có thể do lớp màu mỏng này đã bị tẩy mất sau các lần phục chế cổ xưa.",
+        "link_anh": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Mona_Lisa%2C_by_Leonardo_da_Vinci%2C_from_C2RMF_retouched.jpg/512px-Mona_Lisa%2C_by_Leonardo_da_Vinci%2C_from_C2RMF_retouched.jpg",
+        "link_video": "https://www.youtube.com/embed/NGsUFvwgvCo"
+      },
+      {
+        "id": "davinci_02",
+        "ten": "The Last Supper",
+        "nam_hoan_thanh": "1495 - 1498",
+        "kich_thuoc": "460 cm x 880 cm",
+        "chat_lieu": "Tempera trên gạch",
+        "vi_tri": "Milan, Ý",
+        "mo_ta": "Ghi lại khoảnh khắc kịch tính khi Chúa Jesus tuyên bố có kẻ phản bội.\nBố cục tranh tuân theo quy tắc đối xứng và phối cảnh một điểm tụ cực kỳ chính xác.\nTác phẩm chứa đựng các biểu tượng toán học và âm nhạc ẩn dấu trên bàn tiệc.",
+        "su_that_thu_vi": "Các lát bánh mì trên bàn ăn tạo thành các nốt nhạc; nếu đọc từ phải sang trái sẽ tạo ra một bản nhạc buồn.",
+        "link_anh": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/Ultima_Cena_-_Leonardo_Da_Vinci_-_High_Resolution_v2.jpg/1024px-Ultima_Cena_-_Leonardo_Da_Vinci_-_High_Resolution_v2.jpg",
+        "link_video": "https://www.youtube.com/embed/iV6_wTrkdS0"
+      },
+      {
+        "id": "davinci_03",
+        "ten": "Salvator Mundi",
+        "nam_hoan_thanh": "1490 - 1500",
+        "kich_thuoc": "65.7 cm x 45.4 cm",
+        "chat_lieu": "Sơn dầu trên gỗ óc chó",
+        "vi_tri": "Bộ sưu tập cá nhân",
+        "mo_ta": "Mô tả Chúa Jesus cầm quả cầu pha lê tượng trưng cho quyền năng vũ trụ.\nTác phẩm thể hiện sự tinh xảo trong việc vẽ ánh sáng xuyên qua vật liệu trong suốt.\nĐây là bức tranh đắt nhất lịch sử từng được bán trong một cuộc đấu giá công khai.",
+        "su_that_thu_vi": "Quả cầu pha lê không làm biến dạng tà áo phía sau, thể hiện quyền năng siêu nhiên vượt quy luật vật lý.",
+        "link_anh": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Leonardo_da_Vinci%2C_Salvator_Mundi%2C_c.1500%2C_oil_on_walnut_panel%2C_65.7_%C3%97_45.4_cm.jpg/512px-Leonardo_da_Vinci%2C_Salvator_Mundi%2C_c.1500%2C_oil_on_walnut_panel%2C_65.7_%C3%97_45.4_cm.jpg",
+        "link_video": "https://www.youtube.com/embed/jRetS5gfO6Y"
+      },
+      {
+        "id": "davinci_04",
+        "ten": "Lady with an Ermine",
+        "nam_hoan_thanh": "1489 - 1490",
+        "kich_thuoc": "54 cm x 39 cm",
+        "chat_lieu": "Sơn dầu trên bảng gỗ",
+        "vi_tri": "Bảo tàng Czartoryski, Ba Lan",
+        "mo_ta": "Chân dung Cecilia Gallerani với con chồn tượng trưng cho sự thuần khiết.\nBức tranh phá vỡ lối vẽ truyền thống bằng cách để nhân vật quay người sang bên.\nÁnh sáng tạo ra khối nổi sống động, thể hiện bước tiến lớn của hội họa Phục hưng.",
+        "su_that_thu_vi": "Con chồn là biểu tượng chơi chữ cho họ của người mẫu (Gallerani) và che giấu bí mật mang thai của cô gái.",
+        "link_anh": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ed/Lady_with_an_Ermine_-_Leonardo_da_Vinci_-_Google_Art_Project.jpg/512px-Lady_with_an_Ermine_-_Leonardo_da_Vinci_-_Google_Art_Project.jpg",
+        "link_video": "https://www.youtube.com/embed/LZd_SeM2YMg"
+      },
+      {
+        "id": "davinci_05",
+        "ten": "Vitruvian Man",
+        "nam_hoan_thanh": "1490",
+        "kich_thuoc": "34.6 cm x 24.4 cm",
+        "chat_lieu": "Mực trên giấy",
+        "vi_tri": "Venice, Ý",
+        "mo_ta": "Bản vẽ nghiên cứu tỷ lệ vàng của cơ thể người dựa trên các hình khối cơ bản.\nSự kết hợp hoàn hảo giữa toán học, giải phẫu học và nghệ thuật hội họa.\nKhẳng định triết lý con người là trung tâm và thước đo của mọi sự vật trong vũ trụ.",
+        "su_that_thu_vi": "Tác phẩm chứng minh sải tay của con người luôn bằng đúng chiều cao cơ thể của họ.",
+        "link_anh": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/Da_Vinci_Vitruve_Luc_Viatour.jpg/512px-Da_Vinci_Vitruve_Luc_Viatour.jpg",
+        "link_video": "https://www.youtube.com/embed/aMsaFP3kgqQ"
+      }
+    ]
+  }
+}
