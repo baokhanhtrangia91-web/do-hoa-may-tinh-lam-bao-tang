@@ -69,7 +69,7 @@ function createWorld() {
     const loader = new THREE.TextureLoader();
 
     // Sàn nhà
-    const floorTex = loader.load('https://threejs.org/examples/textures/hardwood2_diffuse.jpg');
+    const floorTex = loader.load('textures/white-tiles-textures-background.jpg');
     floorTex.wrapS = floorTex.wrapT = THREE.RepeatWrapping;
     floorTex.repeat.set(10, 10);
     const floor = new THREE.Mesh(
@@ -95,10 +95,10 @@ function createWorld() {
     addW(1, 10, ROOM_SIZE, ROOM_SIZE/2, 0);  // Đông
 
     // Tranh
-    addArt('https://threejs.org/examples/textures/711.jpg', 6, 4, 0, -19.4, 0, 
-        "Rừng Thu", "Bức tranh mô tả khoảnh khắc giao mùa tuyệt đẹp.");
-    addArt('https://threejs.org/examples/textures/uv_grid_opengl.jpg', 5, 5, -19.4, 5, Math.PI/2,
-        "Logic Số", "Nghệ thuật trừu tượng dựa trên thuật toán.");
+    addArt('textures/mona.JPG', 6, 4, 0, -19.4, 0, 
+        "molisa");
+    addArt('textures/the-madonna.jpg', 5, 5, -19.4, 5, Math.PI/2,
+        "tranhdepkhong");
 }
 
 function addArt(url, w, h, x, z, ry, title, desc) {
