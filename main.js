@@ -21,7 +21,12 @@ const artUI = document.getElementById('art-description');
 const artTitle = document.getElementById('art-title');
 const artText = document.getElementById('art-text');
 
-// Kích thước theo sơ đồ (Phòng lớn 50x50, Phòng nhỏ 20x15)
+// CẬP NHẬT: Media Elements
+const mediaBtn = document.getElementById('media-btn');
+const artVideo = document.getElementById('art-video');
+const artAudio = document.getElementById('art-audio');
+
+// Kích thước theo sơ đồ
 const BIG_ROOM = 50; 
 const SMALL_ROOM_W = 20;
 const SMALL_ROOM_D = 15;
@@ -35,8 +40,6 @@ function init() {
     scene.fog = new THREE.Fog(0x0a0a0a, 0, 70);
 
     camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    
-    // SPAWN ở phòng nhỏ (Phía dưới sơ đồ, trục Z dương)
     camera.position.set(0, 2.5, 40); 
 
     renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -51,12 +54,22 @@ function init() {
     scene.add(sun);
 
     controls = new PointerLockControls(camera, document.body);
+    
     instructions.addEventListener('click', () => controls.lock());
-    controls.addEventListener('lock', () => instructions.style.display = 'none');
-    controls.addEventListener('unlock', () => {
-        instructions.style.display = 'flex';
-        artUI.style.display = 'none';
+    
+    controls.addEventListener('lock', () => {
+        instructions.style.display = 'none';
+        artUI.style.display = 'none'; // Đóng UI khi quay lại game
+        stopAllMedia();
     });
+
+    controls.addEventListener('unlock', () => {
+        // Chỉ hiện hướng dẫn nếu bảng tranh không mở
+        if (artUI.style.display !== 'block') {
+            instructions.style.display = 'flex';
+        }
+    });
+
     scene.add(controls.getObject());
 
     raycaster = new THREE.Raycaster();
@@ -72,20 +85,18 @@ function createWorld() {
     const loader = new THREE.TextureLoader();
     const wallMat = new THREE.MeshStandardMaterial({ color: 0xffffff });
 
-    // --- 1. SÀN NHÀ (Gộp cả 2 phòng) ---
+    // 1. SÀN NHÀ
     const floorTex = loader.load('textures/white-tiles-textures-background.jpg');
     floorTex.wrapS = floorTex.wrapT = THREE.RepeatWrapping;
     floorTex.repeat.set(15, 15);
     
-    // Sàn phòng lớn
     const floorBig = new THREE.Mesh(new THREE.PlaneGeometry(BIG_ROOM, BIG_ROOM), new THREE.MeshStandardMaterial({map: floorTex}));
     floorBig.rotation.x = -Math.PI / 2;
     scene.add(floorBig);
 
-    // Sàn phòng nhỏ (Spawn)
     const floorSmall = new THREE.Mesh(new THREE.PlaneGeometry(SMALL_ROOM_W, SMALL_ROOM_D), new THREE.MeshStandardMaterial({color: 0xdddddd}));
     floorSmall.rotation.x = -Math.PI / 2;
-    floorSmall.position.set(0, 0.01, 32.5); // Nối tiếp trục Z
+    floorSmall.position.set(0, 0.01, 32.5);
     scene.add(floorSmall);
 
     const addW = (w, h, d, x, z, ry = 0) => {
@@ -95,54 +106,46 @@ function createWorld() {
         scene.add(wall);
     };
 
-    // --- 2. TƯỜNG PHÒNG LỚN ---
-    addW(BIG_ROOM, 12, 1, 0, -25); // Tường chính (Bắc)
-    addW(1, 12, BIG_ROOM, -25, 0); // Tường trái (Tây)
-    addW(1, 12, BIG_ROOM, 25, 0);  // Tường phải (Đông)
-    // Tường ngăn cách có cửa (Nam)
+    // 2 & 3. TƯỜNG
+    addW(BIG_ROOM, 12, 1, 0, -25);
+    addW(1, 12, BIG_ROOM, -25, 0);
+    addW(1, 12, BIG_ROOM, 25, 0);
     addW(20, 12, 1, -15, 25); 
     addW(20, 12, 1, 15, 25);
-
-    // --- 3. TƯỜNG PHÒNG NHỎ (Spawn) ---
-    addW(SMALL_ROOM_W, 10, 1, 0, 40); // Tường sau lưng spawn
+    addW(SMALL_ROOM_W, 10, 1, 0, 40);
     addW(1, 10, SMALL_ROOM_D, -10, 32.5);
     addW(1, 10, SMALL_ROOM_D, 10, 32.5);
 
-    // --- 4. BỐ TRÍ VẬT THỂ (GHẾ & BỆ) ---
-    // Ghế ở giữa phòng lớn
+    // 4. VẬT THỂ
     const gHe = new THREE.Mesh(new THREE.BoxGeometry(4, 1.5, 8), new THREE.MeshStandardMaterial({color: 0x333333}));
     gHe.position.set(0, 0.75, 0);
     scene.add(gHe);
 
-    // Bệ treo tranh chính
     const beTranh = new THREE.Mesh(new THREE.BoxGeometry(8, 0.5, 2), new THREE.MeshStandardMaterial({color: 0x222222}));
     beTranh.position.set(0, 0.25, -23.5);
     scene.add(beTranh);
 
-    // --- 5. TREO TRANH THEO SƠ ĐỒ ---
-    // Tranh chính (đối diện cửa)
-    addArt('textures/mona.JPG', 10, 6, 0, -24.4, 0, "Tranh Chính", "Tác phẩm tiêu điểm của phòng triển lãm.");
-
-    // Tranh 1 & 3 (Tường bên trái - số 1 ở trên, 3 ở dưới)
-    addArt('textures/the-madonna.jpg', 5, 5, -24.4, -15, Math.PI/2, "Tranh 1", "Mô tả tranh 1");
+    // --- 5. CẬP NHẬT: TREO TRANH CÓ MEDIA ---
+    // Cấu trúc: addArt(url, rộng, cao, x, z, xoay, tiêu đề, mô tả, link_media, loại_media)
+    addArt('textures/mona.JPG', 10, 6, 0, -24.4, 0, "Mona Lisa", "Tác phẩm kinh điển của Leonardo da Vinci.", 'audio/How the Mona Lisa became so overrated.mp3', 'video');
+    addArt('textures/the-madonna.jpg', 5, 5, -24.4, -15, Math.PI/2, "The Madonna", "Thuyết minh về sự ra đời của tác phẩm.", 'audio/madonna.mp3', 'audio');
     addArt('textures/art3.jpg', 5, 5, -24.4, 15, Math.PI/2, "Tranh 3", "Mô tả tranh 3");
-
-    // Tranh 2 & 4 (Tường bên phải - số 2 ở trên, 4 ở dưới)
     addArt('textures/art2.jpg', 5, 5, 24.4, -15, -Math.PI/2, "Tranh 2", "Mô tả tranh 2");
     addArt('textures/art4.jpg', 5, 5, 24.4, 15, -Math.PI/2, "Tranh 4", "Mô tả tranh 4");
-
-    // Thông tin phòng (Gần cửa ra vào)
-    addArt('textures/info.jpg', 7, 9, -10, 24.4, Math.PI, "Thông Tin Triển Lãm", "Chào mừng bạn đến với bảo tàng 3D.");
+    addArt('textures/info.jpg', 7, 9, -10, 24.4, Math.PI, "Thông Tin", "Chào mừng bạn.");
 }
 
-function addArt(url, w, h, x, z, ry, title, desc) {
+// CẬP NHẬT: Hàm addArt nhận thêm media
+function addArt(url, w, h, x, z, ry, title, desc, mediaUrl = '', mediaType = 'none') {
     const group = new THREE.Group();
     const loader = new THREE.TextureLoader();
     const art = new THREE.Mesh(
         new THREE.PlaneGeometry(w, h),
         new THREE.MeshStandardMaterial({ map: loader.load(url) })
     );
-    art.userData = { isArt: true, title, desc };
+    
+    // Lưu thông tin vào userData
+    art.userData = { isArt: true, title, desc, mediaUrl, mediaType };
     
     const frame = new THREE.Mesh(new THREE.BoxGeometry(w+0.4, h+0.4, 0.1), new THREE.MeshStandardMaterial({color:0x000000}));
     group.add(frame);
@@ -166,12 +169,55 @@ function onKeyDown(e) {
 }
 
 function toggleArtUI() {
-    if (artUI.style.display === 'block') artUI.style.display = 'none';
-    else if (intersectedArt) {
-        artTitle.innerText = intersectedArt.userData.title;
-        artText.innerText = intersectedArt.userData.desc;
+    if (artUI.style.display === 'block') {
+        // Đóng bảng
+        artUI.style.display = 'none';
+        stopAllMedia();
+        
+        // RESET VẬN TỐC để tránh bị văng
+        velocity.set(0, 0, 0); 
+        moveForward = moveBackward = moveLeft = moveRight = false;
+        
+        controls.lock(); 
+    } else if (intersectedArt) {
+        // Mở bảng
+        const data = intersectedArt.userData;
+        artTitle.innerText = data.title;
+        artText.innerText = data.desc;
         artUI.style.display = 'block';
+
+        // Reset vận tốc khi mở bảng để nhân vật đứng yên tại chỗ
+        velocity.set(0, 0, 0);
+        moveForward = moveBackward = moveLeft = moveRight = false;
+
+        if (data.mediaType !== 'none') {
+            mediaBtn.style.display = 'block';
+            mediaBtn.onclick = () => playMedia(data.mediaUrl, data.mediaType);
+        } else {
+            mediaBtn.style.display = 'none';
+        }
+        controls.unlock(); 
     }
+}
+
+function playMedia(url, type) {
+    stopAllMedia();
+    if (type === 'video') {
+        artVideo.src = url;
+        artVideo.style.display = 'block';
+        artVideo.play();
+    } else if (type === 'audio') {
+        artAudio.src = url;
+        artAudio.play();
+    }
+}
+
+function stopAllMedia() {
+    artVideo.pause();
+    artVideo.src = "";
+    artVideo.style.display = 'none';
+    artAudio.pause();
+    artAudio.src = "";
 }
 
 function onKeyUp(e) {
@@ -192,12 +238,16 @@ function onWindowResize() {
 
 function animate() {
     requestAnimationFrame(animate);
+    
     if (controls.isLocked) {
         const time = performance.now();
         const delta = (time - prevTime) / 1000;
 
-        velocity.x -= velocity.x * 10.0 * delta;
-        velocity.z -= velocity.z * 10.0 * delta;
+        // Giới hạn delta tối đa để tránh bị nhảy vọt khi lag hoặc switch menu
+        const actualDelta = Math.min(delta, 0.1); 
+
+        velocity.x -= velocity.x * 10.0 * actualDelta;
+        velocity.z -= velocity.z * 10.0 * actualDelta;
         velocity.y -= 30.0 * delta;
 
         direction.z = Number(moveForward) - Number(moveBackward);
@@ -216,18 +266,17 @@ function animate() {
             velocity.y = 0; camera.position.y = 2.5; canJump = true;
         }
 
-        // --- COLLISION (CHẶN TƯỜNG) ---
+        // --- COLLISION ---
         let px = camera.position.x;
         let pz = camera.position.z;
-
-        if (pz > 25) { // Trong phòng nhỏ
+        if (pz > 25) {
             px = Math.max(-9, Math.min(9, px));
             pz = Math.min(39, pz);
-            if (pz < 26 && (px < -4 || px > 4)) pz = 26; // Chặn tường cửa
-        } else { // Trong phòng lớn
+            if (pz < 26 && (px < -4 || px > 4)) pz = 26;
+        } else {
             px = Math.max(-24, Math.min(24, px));
             pz = Math.max(-24, pz);
-            if (pz > 24 && (px < -4 || px > 4)) pz = 24; // Chặn tường cửa từ bên trong
+            if (pz > 24 && (px < -4 || px > 4)) pz = 24;
         }
         camera.position.x = px;
         camera.position.z = pz;
@@ -249,7 +298,6 @@ function animate() {
             intersectedArt = null;
             crosshair.classList.remove('active');
             hudStatus.innerText = "Đang tham quan";
-            if (artUI.style.display === 'block') artUI.style.display = 'none';
         }
 
         hudPos.innerText = `X: ${camera.position.x.toFixed(1)} | Z: ${camera.position.z.toFixed(1)}`;
