@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 // --- BIẾN TOÀN CỤC ---
 let scene, camera, renderer, controls, raycaster;
@@ -12,6 +13,9 @@ const direction = new THREE.Vector3();
 let prevTime = performance.now();
 let intersectedArt = null;
 
+// TỐI ƯU LAG CÁCH 1: Mảng riêng chỉ chứa các bức tranh để Raycaster quét
+const interactableObjects = []; 
+
 // UI Elements
 const instructions = document.getElementById('instructions');
 const hudStatus = document.getElementById('status');
@@ -21,7 +25,7 @@ const artUI = document.getElementById('art-description');
 const artTitle = document.getElementById('art-title');
 const artText = document.getElementById('art-text');
 
-// CẬP NHẬT: Media Elements
+// Media Elements
 const mediaBtn = document.getElementById('media-btn');
 const artVideo = document.getElementById('art-video');
 const artAudio = document.getElementById('art-audio');
@@ -45,13 +49,11 @@ function init() {
     renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(window.devicePixelRatio);
-    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.enabled = true; // Vẫn bật shadow tổng thể cho các vật thể khác (nếu cần)
     document.body.appendChild(renderer.domElement);
 
-    scene.add(new THREE.AmbientLight(0xffffff, 0.3));
-    const sun = new THREE.DirectionalLight(0xffffff, 0.6);
-    sun.position.set(10, 20, 10);
-    scene.add(sun);
+    // Tăng nhẹ ánh sáng môi trường để các góc tối không bị đen kịt
+    scene.add(new THREE.AmbientLight(0xffffff, 0.4)); 
 
     controls = new PointerLockControls(camera, document.body);
     
@@ -83,7 +85,7 @@ function init() {
 
 function createWorld() {
     const loader = new THREE.TextureLoader();
-    const wallMat = new THREE.MeshStandardMaterial({ color: 0xffffff });
+    const wallMat = new THREE.MeshStandardMaterial({ color: 0xFFFFFF });
 
     // 1. SÀN NHÀ
     const floorTex = loader.load('textures/white-tiles-textures-background.jpg');
@@ -92,38 +94,97 @@ function createWorld() {
     
     const floorBig = new THREE.Mesh(new THREE.PlaneGeometry(BIG_ROOM, BIG_ROOM), new THREE.MeshStandardMaterial({map: floorTex}));
     floorBig.rotation.x = -Math.PI / 2;
+    floorBig.receiveShadow = true;
     scene.add(floorBig);
 
     const floorSmall = new THREE.Mesh(new THREE.PlaneGeometry(SMALL_ROOM_W, SMALL_ROOM_D), new THREE.MeshStandardMaterial({color: 0xdddddd}));
     floorSmall.rotation.x = -Math.PI / 2;
     floorSmall.position.set(0, 0.01, 32.5);
+    floorSmall.receiveShadow = true;
     scene.add(floorSmall);
 
     const addW = (w, h, d, x, z, ry = 0) => {
         const wall = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), wallMat);
         wall.position.set(x, h/2, z);
         wall.rotation.y = ry;
+        wall.receiveShadow = true;
         scene.add(wall);
     };
 
-    // 2 & 3. TƯỜNG
-    addW(BIG_ROOM, 12, 1, 0, -25);
-    addW(1, 12, BIG_ROOM, -25, 0);
-    addW(1, 12, BIG_ROOM, 25, 0);
-    addW(20, 12, 1, -15, 25); 
-    addW(20, 12, 1, 15, 25);
-    addW(SMALL_ROOM_W, 10, 1, 0, 40);
-    addW(1, 10, SMALL_ROOM_D, -10, 32.5);
-    addW(1, 10, SMALL_ROOM_D, 10, 32.5);
+    // 2. TƯỜNG
+    addW(BIG_ROOM, 13, 1, 0, -25);
+    addW(1, 13, BIG_ROOM, -25, 0);
+    addW(1, 13, BIG_ROOM, 25, 0);
+    addW(20, 13, 1, -15, 25); 
+    addW(20, 13, 1, 15, 25);
+    addW(SMALL_ROOM_W, 13, 1, 0, 40);
+    addW(1, 13, SMALL_ROOM_D, -10, 32.5);
+    addW(1, 13, SMALL_ROOM_D, 10, 32.5);
 
-    // 4. VẬT THỂ
-    const gHe = new THREE.Mesh(new THREE.BoxGeometry(8, 1.5, 8), new THREE.MeshStandardMaterial({color: 0xffffff}));
+    // 3. VẬT THỂ GIỮA PHÒNG (Bục đặt tượng)
+    const gHe = new THREE.Mesh(new THREE.BoxGeometry(7, 1.5, 7), new THREE.MeshStandardMaterial({color: 0xffffff}));
     gHe.position.set(0, 0.75, 0);
     scene.add(gHe);
 
+    // 4. THÊM BỨC TƯỢNG (STATUE)
+    const loader3D = new GLTFLoader();
+    loader3D.load('bld/Dragon_2.5_For_Animations.glb', (gltf) => {
+        const statue = gltf.scene;
+        statue.position.set(0, 1.5, 0); 
+        statue.scale.set(0.2, 0.2, 0.2); 
+        
+        statue.traverse((node) => {
+            if (node.isMesh) {
+                node.castShadow = true;
+                node.receiveShadow = true;
+            }
+        });
+        scene.add(statue);
+    }, undefined, (error) => {
+        console.error("Lỗi khi tải tượng:", error);
+    });
 
-    // --- 5. CẬP NHẬT: TREO TRANH CÓ MEDIA ---
-    // Cấu trúc: addArt(url, rộng, cao, x, z, xoay, tiêu đề, mô tả, link_media, loại_media)
+    // 5. TRẦN NHÀ
+    const ceilingMat = new THREE.MeshStandardMaterial({ color: 0xdddddd, roughness: 0.9 });
+    
+    const ceilingBig = new THREE.Mesh(new THREE.PlaneGeometry(BIG_ROOM, BIG_ROOM), ceilingMat);
+    ceilingBig.rotation.x = Math.PI / 2; 
+    ceilingBig.position.set(0, 13, 0);   
+    scene.add(ceilingBig);
+
+    const ceilingSmall = new THREE.Mesh(new THREE.PlaneGeometry(SMALL_ROOM_W, SMALL_ROOM_D), ceilingMat);
+    ceilingSmall.rotation.x = Math.PI / 2;
+    ceilingSmall.position.set(0, 13, 32.5); 
+    scene.add(ceilingSmall);
+
+    // 6. HỆ THỐNG ĐÈN TRẦN
+    const addCeilingLight = (x, z) => {
+        // Hộp đèn LED phát sáng
+        const bulbGeometry = new THREE.BoxGeometry(2.5, 0.1, 2.5);
+        const bulbMaterial = new THREE.MeshBasicMaterial({ color: 0xffffee }); 
+        const bulb = new THREE.Mesh(bulbGeometry, bulbMaterial);
+        bulb.position.set(x, 12.95, z); 
+        scene.add(bulb);
+
+        // Nguồn sáng thực tế
+        const light = new THREE.PointLight(0xffffee, 0.8, 60); 
+        light.position.set(x, 12.5, z); 
+        
+        // TỐI ƯU LAG CÁCH 2: TẮT castShadow CỦA POINTLIGHT
+        light.castShadow = false; 
+        
+        scene.add(light);
+    };
+
+    // Phân bố đèn
+    addCeilingLight(0, 0);       
+    addCeilingLight(-15, -15);   
+    addCeilingLight(15, -15);    
+    addCeilingLight(-15, 12);    
+    addCeilingLight(15, 12);     
+    addCeilingLight(0, 32.5);    
+
+    // 7. TREO TRANH
     addArt('textures/mona.JPG', 10, 6, 0, -24.4, 0, "Mona Lisa", "Tác phẩm kinh điển của Leonardo da Vinci.", 'audio/How the Mona Lisa became so overrated.mp3', 'video');
     addArt('textures/the-madonna.jpg', 5, 5, -24.4, -15, Math.PI/2, "The Madonna", "Thuyết minh về sự ra đời của tác phẩm.", 'audio/madonna.mp3', 'audio');
     addArt('textures/art3.jpg', 5, 5, -24.4, 15, Math.PI/2, "Tranh 3", "Mô tả tranh 3");
@@ -132,7 +193,7 @@ function createWorld() {
     addArt('textures/info.jpg', 7, 9, -10, 24.4, Math.PI, "Thông Tin", "Chào mừng bạn.");
 }
 
-// CẬP NHẬT: Hàm addArt nhận thêm media
+// CẬP NHẬT: Hàm addArt nhận thêm media và đưa vào mảng tương tác
 function addArt(url, w, h, x, z, ry, title, desc, mediaUrl = '', mediaType = 'none') {
     const group = new THREE.Group();
     const loader = new THREE.TextureLoader();
@@ -143,6 +204,9 @@ function addArt(url, w, h, x, z, ry, title, desc, mediaUrl = '', mediaType = 'no
     
     // Lưu thông tin vào userData
     art.userData = { isArt: true, title, desc, mediaUrl, mediaType };
+    
+    // TỐI ƯU LAG CÁCH 1: Đưa tranh vào danh sách cần quét Raycaster
+    interactableObjects.push(art);
     
     const frame = new THREE.Mesh(new THREE.BoxGeometry(w+0.4, h+0.4, 0.1), new THREE.MeshStandardMaterial({color:0x000000}));
     group.add(frame);
@@ -165,25 +229,29 @@ function onKeyDown(e) {
     }
 }
 
+function onKeyUp(e) {
+    switch (e.code) {
+        case 'KeyW': moveForward = false; break;
+        case 'KeyS': moveBackward = false; break;
+        case 'KeyA': moveLeft = false; break;
+        case 'KeyD': moveRight = false; break;
+        case 'ShiftLeft': isSprinting = false; break;
+    }
+}
+
 function toggleArtUI() {
     if (artUI.style.display === 'block') {
-        // Đóng bảng
         artUI.style.display = 'none';
         stopAllMedia();
-        
-        // RESET VẬN TỐC để tránh bị văng
         velocity.set(0, 0, 0); 
         moveForward = moveBackward = moveLeft = moveRight = false;
-        
         controls.lock(); 
     } else if (intersectedArt) {
-        // Mở bảng
         const data = intersectedArt.userData;
         artTitle.innerText = data.title;
         artText.innerText = data.desc;
         artUI.style.display = 'block';
 
-        // Reset vận tốc khi mở bảng để nhân vật đứng yên tại chỗ
         velocity.set(0, 0, 0);
         moveForward = moveBackward = moveLeft = moveRight = false;
 
@@ -217,16 +285,6 @@ function stopAllMedia() {
     artAudio.src = "";
 }
 
-function onKeyUp(e) {
-    switch (e.code) {
-        case 'KeyW': moveForward = false; break;
-        case 'KeyS': moveBackward = false; break;
-        case 'KeyA': moveLeft = false; break;
-        case 'KeyD': moveRight = false; break;
-        case 'ShiftLeft': isSprinting = false; break;
-    }
-}
-
 function onWindowResize() {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
@@ -239,8 +297,6 @@ function animate() {
     if (controls.isLocked) {
         const time = performance.now();
         const delta = (time - prevTime) / 1000;
-
-        // Giới hạn delta tối đa để tránh bị nhảy vọt khi lag hoặc switch menu
         const actualDelta = Math.min(delta, 0.1); 
 
         velocity.x -= velocity.x * 10.0 * actualDelta;
@@ -275,31 +331,28 @@ function animate() {
             pz = Math.max(-24, pz);
             if (pz > 24 && (px < -4 || px > 4)) pz = 24;
         }
-        // 2. THÊM MỚI: Va chạm với khối vuông ở giữa (gHe)
-        // Khối vuông có kích thước 8x8 (x: -4 đến 4, z: -4 đến 4)
-        // Ta cộng thêm 1 khoảng đệm (buffer = 1) để camera không bị cắm xuyên vào vật thể
-        const boxSize = 4; // Một nửa chiều rộng/dài của khối
-        const buffer = 1.0; // Khoảng cách từ camera đến mặt khối
-        const bound = boxSize + buffer; // = 5
+        
+        // Va chạm với khối vuông ở giữa (gHe)
+        const boxSize = 3.5; // gHe rộng 7x7 nên nửa chiều là 3.5
+        const buffer = 1.0; 
+        const bound = boxSize + buffer; // = 4.5
 
         if (px > -bound && px < bound && pz > -bound && pz < bound) {
-            // Nếu người chơi lọt vào vùng của khối, đẩy họ ra theo trục gần nhất
             if (Math.abs(px) > Math.abs(pz)) {
-                // Đẩy ra theo trục X
                 px = px > 0 ? bound : -bound;
             } else {
-                // Đẩy ra theo trục Z
                 pz = pz > 0 ? bound : -bound;
             }
         }
 
-        // Gán lại tọa độ cho camera
         camera.position.x = px;
         camera.position.z = pz;
 
-        // --- RAYCASTING ---
+        // --- RAYCASTING (ĐÃ TỐI ƯU) ---
         raycaster.setFromCamera(mouse, camera);
-        const intersects = raycaster.intersectObjects(scene.children, true);
+        // TỐI ƯU LAG CÁCH 1: Chỉ kiểm tra va chạm tia nhìn với các bức tranh, bỏ thuộc tính "true" đệ quy
+        const intersects = raycaster.intersectObjects(interactableObjects, false);
+        
         let foundArt = false;
         if (intersects.length > 0) {
             const obj = intersects[0].object;
