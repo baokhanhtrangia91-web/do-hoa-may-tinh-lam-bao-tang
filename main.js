@@ -158,11 +158,11 @@ function createWorld() {
 
     // 4. THÊM BỨC TƯỢNG (STATUE)
     new GLTFLoader().load(
-        'bld/Dragon_2.5_For_Animations.glb', 
+        'bld/bronze_moses_at_augustana_university.glb', 
         (gltf) => {
             const model = gltf.scene;
-            model.position.set(0, 1.2, 0);
-            model.scale.set(0.1, 0.1, 0.1);
+            model.position.set(0, 6, 0);
+            model.scale.set(0.4, 0.4, 0.4);
             model.traverse(n => { if(n.isMesh) n.castShadow = true; });
             scene.add(model);
         }, 
@@ -220,7 +220,7 @@ function createWorld() {
     addArt('textures/art4.jpg', 5, 5, 24.4, 15, -Math.PI/2, "Tranh 4", "Mô tả tranh 4");
     
     // BỨC TRANH THÔNG TIN LÀM THÀNH PHIẾN ĐÁ
-    addArt('textures/Screenshot 2026-04-11 125416.png', 7, 9, -9, 24.0, Math.PI, "Thông Tin", "Chào mừng bạn.", '', 'none', 1.2, 0x555555);
+    addArt('textures/Screenshot 2026-04-11 125416.png', 7, 9, -9, 24.0, Math.PI, "Thông Tin", "thông tin thông tin thông tin", '', 'none', 1.2, 0x555555);
 }
 
 // CẬP NHẬT: Hàm addArt nhận thêm độ dày, màu sắc và ĐÈN RỌI
