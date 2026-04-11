@@ -117,13 +117,10 @@ function createWorld() {
     addW(1, 10, SMALL_ROOM_D, 10, 32.5);
 
     // 4. VẬT THỂ
-    const gHe = new THREE.Mesh(new THREE.BoxGeometry(4, 1.5, 8), new THREE.MeshStandardMaterial({color: 0x333333}));
+    const gHe = new THREE.Mesh(new THREE.BoxGeometry(8, 1.5, 8), new THREE.MeshStandardMaterial({color: 0xffffff}));
     gHe.position.set(0, 0.75, 0);
     scene.add(gHe);
 
-    const beTranh = new THREE.Mesh(new THREE.BoxGeometry(8, 0.5, 2), new THREE.MeshStandardMaterial({color: 0x222222}));
-    beTranh.position.set(0, 0.25, -23.5);
-    scene.add(beTranh);
 
     // --- 5. CẬP NHẬT: TREO TRANH CÓ MEDIA ---
     // Cấu trúc: addArt(url, rộng, cao, x, z, xoay, tiêu đề, mô tả, link_media, loại_media)
@@ -278,6 +275,25 @@ function animate() {
             pz = Math.max(-24, pz);
             if (pz > 24 && (px < -4 || px > 4)) pz = 24;
         }
+        // 2. THÊM MỚI: Va chạm với khối vuông ở giữa (gHe)
+        // Khối vuông có kích thước 8x8 (x: -4 đến 4, z: -4 đến 4)
+        // Ta cộng thêm 1 khoảng đệm (buffer = 1) để camera không bị cắm xuyên vào vật thể
+        const boxSize = 4; // Một nửa chiều rộng/dài của khối
+        const buffer = 1.0; // Khoảng cách từ camera đến mặt khối
+        const bound = boxSize + buffer; // = 5
+
+        if (px > -bound && px < bound && pz > -bound && pz < bound) {
+            // Nếu người chơi lọt vào vùng của khối, đẩy họ ra theo trục gần nhất
+            if (Math.abs(px) > Math.abs(pz)) {
+                // Đẩy ra theo trục X
+                px = px > 0 ? bound : -bound;
+            } else {
+                // Đẩy ra theo trục Z
+                pz = pz > 0 ? bound : -bound;
+            }
+        }
+
+        // Gán lại tọa độ cho camera
         camera.position.x = px;
         camera.position.z = pz;
 
