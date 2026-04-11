@@ -49,7 +49,10 @@ function init() {
     renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(window.devicePixelRatio);
-    renderer.shadowMap.enabled = true; // Vẫn bật shadow tổng thể cho các vật thể khác (nếu cần)
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap; // Bóng đổ viền mềm (Soft shadow)
+    renderer.toneMapping = THREE.ACESFilmicToneMapping; // Màu sắc chuẩn điện ảnh
+    renderer.toneMappingExposure = 1.0; // Độ phơi sáng
     document.body.appendChild(renderer.domElement);
 
     // Tăng nhẹ ánh sáng môi trường để các góc tối không bị đen kịt
@@ -121,9 +124,15 @@ function createWorld() {
     addW(1, 13, SMALL_ROOM_D, -10, 32.5);
     addW(1, 13, SMALL_ROOM_D, 10, 32.5);
 
+    // 1. Dùng HemisphereLight tạo ánh sáng môi trường thực tế hơn (trên sáng, dưới tối nhẹ)
+    const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 0.6);
+    hemiLight.position.set(0, 20, 0);
+    scene.add(hemiLight);
     // 3. VẬT THỂ GIỮA PHÒNG (Bục đặt tượng)
-    const gHe = new THREE.Mesh(new THREE.BoxGeometry(7, 1.5, 7), new THREE.MeshStandardMaterial({color: 0xffffff}));
+    const gHe = new THREE.Mesh(new THREE.BoxGeometry(7, 1.5, 7), new THREE.MeshStandardMaterial({color: 0xdddddd}));
     gHe.position.set(0, 0.75, 0);
+    gHe.castShadow = true;     // Thêm dòng này
+    gHe.receiveShadow = true;  // Thêm dòng này
     scene.add(gHe);
 
     // 4. THÊM BỨC TƯỢNG (STATUE)
@@ -144,6 +153,26 @@ function createWorld() {
         console.error("Lỗi khi tải tượng:", error);
     });
 
+    // --- THÊM ĐÈN RỌI (SPOTLIGHT) CHO TƯỢNG ---
+    // Đèn này sẽ tạo ra bóng đổ chính cho căn phòng mà không gây lag như PointLight
+    const statueSpotLight = new THREE.SpotLight(0xfff0dd, 500); // Ánh sáng vàng nhẹ, cường độ cao cho bản Three.js mới
+    statueSpotLight.position.set(5, 12, 10); // Đặt xéo phía trên tượng
+    statueSpotLight.angle = Math.PI / 6; // Góc rọi
+    statueSpotLight.penumbra = 0.5; // Làm mềm viền ánh sáng
+    statueSpotLight.decay = 2; // Độ suy giảm ánh sáng
+    statueSpotLight.distance = 40;
+    
+    // Bật bóng đổ CHỈ cho đèn rọi này
+    statueSpotLight.castShadow = true;
+    statueSpotLight.shadow.mapSize.width = 1024; // Chất lượng bóng
+    statueSpotLight.shadow.mapSize.height = 1024;
+    statueSpotLight.shadow.bias = -0.001; // Fix lỗi sọc đen (shadow acne)
+    
+    scene.add(statueSpotLight);
+    // Cần có target để Spotlight biết chiếu vào đâu
+    statueSpotLight.target.position.set(0, 0, 0); 
+    scene.add(statueSpotLight.target);
+    // ------------------------------------------
     // 5. TRẦN NHÀ
     const ceilingMat = new THREE.MeshStandardMaterial({ color: 0xdddddd, roughness: 0.9 });
     
@@ -160,19 +189,19 @@ function createWorld() {
     // 6. HỆ THỐNG ĐÈN TRẦN
     const addCeilingLight = (x, z) => {
         // Hộp đèn LED phát sáng
-        const bulbGeometry = new THREE.BoxGeometry(2.5, 0.1, 2.5);
-        const bulbMaterial = new THREE.MeshBasicMaterial({ color: 0xffffee }); 
-        const bulb = new THREE.Mesh(bulbGeometry, bulbMaterial);
+        const bulbMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0xffffee, 
+            emissive: 0xffffee,  // Cho bóng đèn tự phát sáng rực lên
+            emissiveIntensity: 2 
+        }); 
+        const bulb = new THREE.Mesh(new THREE.BoxGeometry(2.5, 0.1, 2.5), bulbMaterial);
         bulb.position.set(x, 12.95, z); 
         scene.add(bulb);
 
-        // Nguồn sáng thực tế
-        const light = new THREE.PointLight(0xffffee, 0.8, 60); 
+        // Nguồn sáng thực tế - Giữ nguyên tắt shadow để tối ưu
+        const light = new THREE.PointLight(0xffffee, 80, 25); // Điều chỉnh cường độ cho bản Threejs r160+
         light.position.set(x, 12.5, z); 
-        
-        // TỐI ƯU LAG CÁCH 2: TẮT castShadow CỦA POINTLIGHT
         light.castShadow = false; 
-        
         scene.add(light);
     };
 
@@ -208,7 +237,14 @@ function addArt(url, w, h, x, z, ry, title, desc, mediaUrl = '', mediaType = 'no
     // TỐI ƯU LAG CÁCH 1: Đưa tranh vào danh sách cần quét Raycaster
     interactableObjects.push(art);
     
-    const frame = new THREE.Mesh(new THREE.BoxGeometry(w+0.4, h+0.4, 0.1), new THREE.MeshStandardMaterial({color:0x000000}));
+    const frame = new THREE.Mesh(
+        new THREE.BoxGeometry(w+0.4, h+0.4, 0.1), 
+        new THREE.MeshStandardMaterial({color:0x111111, roughness: 0.8}) // Đổi màu khung đen nhám
+    );
+    
+    // --- BẬT ĐỔ BÓNG CHO KHUNG TRANH ---
+    frame.castShadow = true;
+    
     group.add(frame);
     group.add(art);
     art.position.z = 0.06;
@@ -307,7 +343,7 @@ function animate() {
         direction.x = Number(moveRight) - Number(moveLeft);
         direction.normalize();
 
-        const speed = isSprinting ? 200.0 : 100.0;
+        const speed = isSprinting ? 180.0 : 90.0;
         if (moveForward || moveBackward) velocity.z -= direction.z * speed * delta;
         if (moveLeft || moveRight) velocity.x -= direction.x * speed * delta;
 
