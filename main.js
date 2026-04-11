@@ -97,7 +97,7 @@ function createWorld() {
     scene.add(hemiLight);
 
     // 1. SÀN NHÀ
-    const floorTex = loader.load('textures/white-tiles-textures-background.jpg');
+    const floorTex = loader.load('texture/white-tiles-textures-background.jpg');
     floorTex.wrapS = floorTex.wrapT = THREE.RepeatWrapping;
     floorTex.repeat.set(15, 15);
     
@@ -213,14 +213,14 @@ function createWorld() {
     addCeilingLight(0, 32.5);    
 
     // 7. TREO TRANH
-    addArt('textures/mona.JPG', 10, 6, 0, -24.4, 0, "Mona Lisa", "Tác phẩm kinh điển của Leonardo da Vinci.", 'audio/How the Mona Lisa became so overrated.mp3', 'video');
-    addArt('textures/the-madonna.jpg', 5, 5, -24.4, -15, Math.PI/2, "The Madonna", "Thuyết minh về sự ra đời của tác phẩm.", 'audio/madonna.mp3', 'audio');
-    addArt('textures/art3.jpg', 5, 5, -24.4, 15, Math.PI/2, "Tranh 3", "Mô tả tranh 3");
-    addArt('textures/art2.jpg', 5, 5, 24.4, -15, -Math.PI/2, "Tranh 2", "Mô tả tranh 2");
-    addArt('textures/art4.jpg', 5, 5, 24.4, 15, -Math.PI/2, "Tranh 4", "Mô tả tranh 4");
+    addArt('texture/mona.JPG', 10, 6, 0, -24.4, 0, "Mona Lisa", "Tác phẩm kinh điển của Leonardo da Vinci.", 'audio/How the Mona Lisa became so overrated.mp3', 'video');
+    addArt('texture/the-madonna.jpg', 5, 5, -24.4, -15, Math.PI/2, "The Madonna", "Thuyết minh về sự ra đời của tác phẩm.", 'audio/madonna.mp3', 'audio');
+    addArt('texture/art3.jpg', 5, 5, -24.4, 15, Math.PI/2, "Tranh 3", "Mô tả tranh 3");
+    addArt('texture/art2.jpg', 5, 5, 24.4, -15, -Math.PI/2, "Tranh 2", "Mô tả tranh 2");
+    addArt('texture/art4.jpg', 5, 5, 24.4, 15, -Math.PI/2, "Tranh 4", "Mô tả tranh 4");
     
     // BỨC TRANH THÔNG TIN LÀM THÀNH PHIẾN ĐÁ
-    addArt('textures/Screenshot 2026-04-11 125416.png', 7, 9, -9, 24.0, Math.PI, "Thông Tin", "thông tin thông tin thông tin", '', 'none', 1.2, 0x555555);
+    addArt('texture/Screenshot 2026-04-11 125416.png', 7, 9, -9, 24.0, Math.PI, "Thông Tin", "thông tin thông tin thông tin", '', 'none', 1.2, 0x555555);
 }
 
 // CẬP NHẬT: Hàm addArt nhận thêm độ dày, màu sắc và ĐÈN RỌI
