@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { PointerLockControls } from 'three/examples/jsm/controls/PointerLockControls.js';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 // --- BIẾN TOÀN CỤC ---
 let scene, camera, renderer, controls, raycaster;
@@ -44,7 +44,8 @@ function init() {
     scene.fog = new THREE.Fog(0x0a0a0a, 0, 70);
 
     camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.set(0, 2.5, 40); 
+    // Đã lùi Camera ra Z=35 để không bị kẹt trong tường
+    camera.position.set(0, 2.5, 35); 
 
     renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
@@ -75,7 +76,7 @@ function init() {
         }
     });
 
-    scene.add(controls.getObject());
+    scene.add(camera);
 
     raycaster = new THREE.Raycaster();
     raycaster.far = 8; 
